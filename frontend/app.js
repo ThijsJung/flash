@@ -225,7 +225,7 @@ function showReadyScreen() {
     btn.className = 'size-btn';
     btn.textContent = size === 0 ? `All (${total})` : String(size);
     btn.dataset.size = size;
-    btn.addEventListener('click', () => selectSize(size, true));
+    btn.addEventListener('click', () => selectSize(size));
     el.sessionSizeOptions.appendChild(btn);
   });
 
@@ -241,12 +241,11 @@ function showReadyScreen() {
   showScreen('ready');
 }
 
-function selectSize(size, andStart = false) {
+function selectSize(size) {
   state.selectedSize = size;
   el.sessionSizeOptions.querySelectorAll('.size-btn').forEach(btn => {
     btn.classList.toggle('active', Number(btn.dataset.size) === size);
   });
-  if (andStart) startSession();
 }
 
 // ── Study session ─────────────────────────────────────────────────────────
