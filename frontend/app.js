@@ -326,7 +326,6 @@ document.querySelectorAll('[data-order]').forEach(btn => {
     document.querySelectorAll('[data-order]').forEach(b => {
       b.classList.toggle('active', b === btn);
     });
-    startSession();
   });
 });
 
