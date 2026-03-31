@@ -205,6 +205,54 @@ body {
   font-weight: 400;
 }
 
+/* ── Ready Screen ───────────────────────────────────────────────────────── */
+.ready-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+}
+
+.ready-deck-desc {
+  color: var(--muted);
+  font-size: 0.9375rem;
+}
+
+.session-size-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.session-size-label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.session-size-options {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.size-btn {
+  flex: 1;
+  padding: 0.75rem 0.5rem;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+
+.size-btn.active {
+  border-color: var(--primary);
+  background: var(--primary-dim);
+  color: var(--primary);
+}
+
 /* ── Study Layout ───────────────────────────────────────────────────────── */
 .study-layout {
   width: 100%;

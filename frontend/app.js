@@ -3,41 +3,50 @@ const STORAGE_KEY = 'flash_sheet_url';
 // ── State ────────────────────────────────────────────────────────────────
 const state = {
   sheetId: '',
-  deck: [],
+  fullDeck: [],      // all cards fetched from the sheet
+  deck: [],          // the sliced/shuffled session deck
   currentTab: '',
+  currentDeckDesc: '',
   index: 0,
   known: 0,
   flipped: false,
+  selectedSize: 0,   // 0 = All
 };
 
 // ── DOM refs ─────────────────────────────────────────────────────────────
 const screens = {
   url:     document.getElementById('screen-url'),
   decks:   document.getElementById('screen-decks'),
+  ready:   document.getElementById('screen-ready'),
   study:   document.getElementById('screen-study'),
   summary: document.getElementById('screen-summary'),
 };
 
 const el = {
-  sheetUrl:        document.getElementById('sheet-url'),
-  btnLoad:         document.getElementById('btn-load'),
-  urlError:        document.getElementById('url-error'),
-  btnBackUrl:      document.getElementById('btn-back-url'),
-  deckList:        document.getElementById('deck-list'),
-  btnBackDecks:    document.getElementById('btn-back-decks'),
-  progressBar:      document.getElementById('progress-bar'),
-  progressText:     document.getElementById('progress-text'),
-  card:             document.getElementById('card'),
-  cardInner:        document.querySelector('.card-inner'),
-  cardFrontText:    document.getElementById('card-front-text'),
-  cardBackText:     document.getElementById('card-back-text'),
-  cardNotesText:    document.getElementById('card-notes-text'),
-  answerButtons:    document.getElementById('answer-buttons'),
-  btnKnow:          document.getElementById('btn-know'),
-  btnMiss:          document.getElementById('btn-miss'),
-  summaryScoreNum:  document.getElementById('summary-score-num'),
-  btnStudyAgain:    document.getElementById('btn-study-again'),
-  btnPickDeck:      document.getElementById('btn-pick-deck'),
+  sheetUrl:           document.getElementById('sheet-url'),
+  btnLoad:            document.getElementById('btn-load'),
+  urlError:           document.getElementById('url-error'),
+  btnBackUrl:         document.getElementById('btn-back-url'),
+  deckList:           document.getElementById('deck-list'),
+  btnBackReady:       document.getElementById('btn-back-ready'),
+  readyDeckName:      document.getElementById('ready-deck-name'),
+  readyDeckDesc:      document.getElementById('ready-deck-desc'),
+  sessionSizeOptions: document.getElementById('session-size-options'),
+  btnStart:           document.getElementById('btn-start'),
+  btnBackDecks:       document.getElementById('btn-back-decks'),
+  progressBar:        document.getElementById('progress-bar'),
+  progressText:       document.getElementById('progress-text'),
+  card:               document.getElementById('card'),
+  cardInner:          document.querySelector('.card-inner'),
+  cardFrontText:      document.getElementById('card-front-text'),
+  cardBackText:       document.getElementById('card-back-text'),
+  cardNotesText:      document.getElementById('card-notes-text'),
+  answerButtons:      document.getElementById('answer-buttons'),
+  btnKnow:            document.getElementById('btn-know'),
+  btnMiss:            document.getElementById('btn-miss'),
+  summaryScoreNum:    document.getElementById('summary-score-num'),
+  btnStudyAgain:      document.getElementById('btn-study-again'),
+  btnPickDeck:        document.getElementById('btn-pick-deck'),
 };
 
 // ── Screens ───────────────────────────────────────────────────────────────
@@ -59,6 +68,15 @@ function showUrlError(msg) {
 
 function clearUrlError() {
   el.urlError.classList.add('hidden');
+}
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
 }
 
 // ── Google Sheets fetching ────────────────────────────────────────────────
@@ -166,27 +184,66 @@ function renderDeckList(decks) {
     const btn = document.createElement('button');
     btn.className = 'deck-item';
     btn.innerHTML = `<span class="deck-item-name">${name}</span>${description ? `<span class="deck-item-desc">${description}</span>` : ''}`;
-    btn.addEventListener('click', () => handleSelectDeck(name));
+    btn.addEventListener('click', () => handleSelectDeck(name, description));
     el.deckList.appendChild(btn);
   });
 }
 
-async function handleSelectDeck(tabName) {
+async function handleSelectDeck(tabName, description) {
   try {
     const cards = await fetchCards(state.sheetId, tabName);
     if (cards.length === 0) {
       throw new Error('No cards found. Check that row 1 has "front" and "back" headers.');
     }
     state.currentTab = tabName;
-    state.deck = cards;
-    startSession();
+    state.currentDeckDesc = description;
+    state.fullDeck = cards;
+    showReadyScreen();
   } catch (e) {
     alert(e.message);
   }
 }
 
+// ── Ready screen ──────────────────────────────────────────────────────────
+function showReadyScreen() {
+  const total = state.fullDeck.length;
+
+  el.readyDeckName.textContent = state.currentTab;
+  el.readyDeckDesc.textContent = state.currentDeckDesc;
+  el.readyDeckDesc.classList.toggle('hidden', !state.currentDeckDesc);
+
+  // Build size options: 10 and 20 only shown if deck is large enough
+  const sizes = [10, 20].filter(n => n < total);
+  const options = [...sizes, 0]; // 0 = All
+
+  el.sessionSizeOptions.innerHTML = '';
+  options.forEach(size => {
+    const btn = document.createElement('button');
+    btn.className = 'size-btn';
+    btn.textContent = size === 0 ? `All (${total})` : String(size);
+    btn.dataset.size = size;
+    btn.addEventListener('click', () => selectSize(size));
+    el.sessionSizeOptions.appendChild(btn);
+  });
+
+  // Default: 20 if available, else 10, else All
+  const defaultSize = sizes.includes(20) ? 20 : sizes.includes(10) ? 10 : 0;
+  selectSize(defaultSize);
+
+  showScreen('ready');
+}
+
+function selectSize(size) {
+  state.selectedSize = size;
+  el.sessionSizeOptions.querySelectorAll('.size-btn').forEach(btn => {
+    btn.classList.toggle('active', Number(btn.dataset.size) === size);
+  });
+}
+
 // ── Study session ─────────────────────────────────────────────────────────
 function startSession() {
+  const shuffled = shuffle(state.fullDeck);
+  state.deck = state.selectedSize === 0 ? shuffled : shuffled.slice(0, state.selectedSize);
   state.index = 0;
   state.known = 0;
   showScreen('study');
@@ -244,6 +301,9 @@ el.btnLoad.addEventListener('click', handleLoadDecks);
 el.sheetUrl.addEventListener('keydown', e => { if (e.key === 'Enter') handleLoadDecks(); });
 
 el.btnBackUrl.addEventListener('click', () => showScreen('url'));
+el.btnBackReady.addEventListener('click', () => showScreen('decks'));
+el.btnStart.addEventListener('click', startSession);
+
 el.btnBackDecks.addEventListener('click', () => showScreen('decks'));
 
 el.card.addEventListener('click', flipCard);
@@ -254,7 +314,7 @@ el.card.addEventListener('keydown', e => {
 el.btnKnow.addEventListener('click', () => handleAnswer(true));
 el.btnMiss.addEventListener('click', () => handleAnswer(false));
 
-el.btnStudyAgain.addEventListener('click', startSession);
+el.btnStudyAgain.addEventListener('click', () => showReadyScreen());
 el.btnPickDeck.addEventListener('click', () => showScreen('decks'));
 
 // Keyboard shortcuts during study (right = know it, left = still learning)
