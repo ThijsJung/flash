@@ -10,6 +10,7 @@ const state = {
   index: 0,
   known: 0,
   flipped: false,
+  hasFlipped: false,
   selectedSize: 0,   // 0 = All
 };
 
@@ -41,6 +42,7 @@ const el = {
   cardFrontText:      document.getElementById('card-front-text'),
   cardBackText:       document.getElementById('card-back-text'),
   cardNotesText:      document.getElementById('card-notes-text'),
+  cardHint:           document.querySelector('.card-hint'),
   answerButtons:      document.getElementById('answer-buttons'),
   btnKnow:            document.getElementById('btn-know'),
   btnMiss:            document.getElementById('btn-miss'),
@@ -222,7 +224,7 @@ function showReadyScreen() {
     btn.className = 'size-btn';
     btn.textContent = size === 0 ? `All (${total})` : String(size);
     btn.dataset.size = size;
-    btn.addEventListener('click', () => selectSize(size));
+    btn.addEventListener('click', () => selectSize(size, true));
     el.sessionSizeOptions.appendChild(btn);
   });
 
@@ -233,11 +235,12 @@ function showReadyScreen() {
   showScreen('ready');
 }
 
-function selectSize(size) {
+function selectSize(size, andStart = false) {
   state.selectedSize = size;
   el.sessionSizeOptions.querySelectorAll('.size-btn').forEach(btn => {
     btn.classList.toggle('active', Number(btn.dataset.size) === size);
   });
+  if (andStart) startSession();
 }
 
 // ── Study session ─────────────────────────────────────────────────────────
@@ -267,15 +270,22 @@ function showCard(index) {
   el.cardNotesText.textContent = card.notes;
   el.cardNotesText.classList.toggle('hidden', !card.notes);
   el.answerButtons.classList.remove('visible');
+  el.cardHint.textContent = 'tap to reveal';
+  state.hasFlipped = false;
 
   updateProgress();
 }
 
 function flipCard() {
-  if (state.flipped) return;
-  state.flipped = true;
-  el.cardInner.classList.add('flipped');
-  setTimeout(() => el.answerButtons.classList.add('visible'), 350);
+  state.flipped = !state.flipped;
+  el.cardInner.classList.toggle('flipped', state.flipped);
+  if (state.flipped) {
+    setTimeout(() => el.answerButtons.classList.add('visible'), 350);
+    if (!state.hasFlipped) {
+      state.hasFlipped = true;
+      el.cardHint.textContent = 'tap to flip';
+    }
+  }
 }
 
 function handleAnswer(known) {
