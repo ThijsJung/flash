@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flash</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Screen: URL Input -->
+  <div id="screen-url" class="screen active">
+    <div class="container">
+      <h1 class="logo">Flash</h1>
+      <p class="tagline">Your decks, your way.</p>
+      <div class="input-group">
+        <label for="sheet-url">Google Sheets URL</label>
+        <input type="url" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..." autocomplete="off" spellcheck="false">
+      </div>
+      <button id="btn-load" class="btn btn-primary">Load decks</button>
+      <p id="url-error" class="error hidden"></p>
+    </div>
+  </div>
+
+  <!-- Screen: Deck Picker -->
+  <div id="screen-decks" class="screen">
+    <div class="container">
+      <button id="btn-back-url" class="btn-back">← Back</button>
+      <h2>Choose a deck</h2>
+      <div id="deck-list" class="deck-list"></div>
+    </div>
+  </div>
+
+  <!-- Screen: Study -->
+  <div id="screen-study" class="screen">
+    <div class="study-layout">
+      <div class="study-header">
+        <button id="btn-back-decks" class="btn-back">← Decks</button>
+        <span id="progress-text" class="progress-text">0 / 0</span>
+      </div>
+      <div class="progress-bar-wrap">
+        <div id="progress-bar" class="progress-bar"></div>
+      </div>
+      <div class="card-wrap">
+        <div id="card" class="card" role="button" tabindex="0" aria-label="Flip card">
+          <div class="card-inner">
+            <div class="card-front">
+              <p id="card-front-text" class="card-text"></p>
+              <span class="card-hint">tap to reveal</span>
+            </div>
+            <div class="card-back">
+              <p id="card-back-text" class="card-text"></p>
+              <p id="card-notes-text" class="card-notes"></p>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="answer-buttons" class="answer-buttons hidden">
+        <button id="btn-miss" class="btn btn-miss">Still learning</button>
+        <button id="btn-know" class="btn btn-know">Know it</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen: Summary -->
+  <div id="screen-summary" class="screen">
+    <div class="container">
+      <h2 class="summary-title">Session complete</h2>
+      <div class="summary-score-wrap">
+        <p id="summary-score-num" class="summary-score-num"></p>
+        <p class="summary-score-label">cards known</p>
+      </div>
+      <button id="btn-study-again" class="btn btn-primary">Study again</button>
+      <button id="btn-pick-deck" class="btn btn-secondary">Pick another deck</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
