@@ -337,3 +337,12 @@ document.addEventListener('keydown', e => {
 // ── Init ──────────────────────────────────────────────────────────────────
 const savedUrl = localStorage.getItem(STORAGE_KEY);
 if (savedUrl) el.sheetUrl.value = savedUrl;
+
+// ?sheet=SHEET_ID — pre-load a sheet and skip the URL input screen
+const sheetParam = new URLSearchParams(window.location.search).get('sheet');
+if (sheetParam) {
+  // Accept either a bare sheet ID or a full Google Sheets URL
+  const sheetId = extractSheetId(sheetParam) ?? sheetParam;
+  el.sheetUrl.value = `https://docs.google.com/spreadsheets/d/${sheetId}`;
+  handleLoadDecks();
+}
