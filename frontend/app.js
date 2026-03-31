@@ -209,7 +209,7 @@ function showCard(index) {
   el.cardBackText.textContent  = card.back;
   el.cardNotesText.textContent = card.notes;
   el.cardNotesText.classList.toggle('hidden', !card.notes);
-  el.answerButtons.classList.add('hidden');
+  el.answerButtons.classList.remove('visible');
 
   updateProgress();
 }
@@ -218,7 +218,7 @@ function flipCard() {
   if (state.flipped) return;
   state.flipped = true;
   el.cardInner.classList.add('flipped');
-  setTimeout(() => el.answerButtons.classList.remove('hidden'), 350);
+  setTimeout(() => el.answerButtons.classList.add('visible'), 350);
 }
 
 function handleAnswer(known) {

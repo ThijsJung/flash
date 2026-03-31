@@ -331,6 +331,13 @@ body {
   display: flex;
   gap: 0.75rem;
   padding-bottom: 0.5rem;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.answer-buttons.visible {
+  visibility: visible;
+  pointer-events: auto;
 }
 
 .btn-miss {
