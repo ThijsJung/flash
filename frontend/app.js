@@ -269,7 +269,12 @@ function showCard(index) {
   const card = state.deck[index];
   state.flipped = false;
 
+  // Snap back to front without animating to avoid briefly showing the next card's answer
+  el.cardInner.style.transition = 'none';
   el.cardInner.classList.remove('flipped');
+  el.cardInner.offsetHeight; // force reflow before restoring transition
+  el.cardInner.style.transition = '';
+
   el.cardFrontText.textContent = card.front;
   el.cardBackText.textContent  = card.back;
   el.cardNotesText.textContent = card.notes;
