@@ -12,6 +12,7 @@ const state = {
   flipped: false,
   hasFlipped: false,
   selectedSize: 0,   // 0 = All
+  shuffled: true,
 };
 
 // ── DOM refs ─────────────────────────────────────────────────────────────
@@ -232,6 +233,11 @@ function showReadyScreen() {
   const defaultSize = sizes.includes(20) ? 20 : sizes.includes(10) ? 10 : 0;
   selectSize(defaultSize);
 
+  // Sync order toggle to current state
+  document.querySelectorAll('[data-order]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.order === (state.shuffled ? 'shuffled' : 'ordered'));
+  });
+
   showScreen('ready');
 }
 
@@ -245,8 +251,8 @@ function selectSize(size, andStart = false) {
 
 // ── Study session ─────────────────────────────────────────────────────────
 function startSession() {
-  const shuffled = shuffle(state.fullDeck);
-  state.deck = state.selectedSize === 0 ? shuffled : shuffled.slice(0, state.selectedSize);
+  const ordered = state.shuffled ? shuffle(state.fullDeck) : [...state.fullDeck];
+  state.deck = state.selectedSize === 0 ? ordered : ordered.slice(0, state.selectedSize);
   state.index = 0;
   state.known = 0;
   showScreen('study');
@@ -313,6 +319,16 @@ el.sheetUrl.addEventListener('keydown', e => { if (e.key === 'Enter') handleLoad
 el.btnBackUrl.addEventListener('click', () => showScreen('url'));
 el.btnBackReady.addEventListener('click', () => showScreen('decks'));
 el.btnStart.addEventListener('click', startSession);
+
+document.querySelectorAll('[data-order]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.shuffled = btn.dataset.order === 'shuffled';
+    document.querySelectorAll('[data-order]').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+    startSession();
+  });
+});
 
 el.btnBackDecks.addEventListener('click', () => showScreen('decks'));
 
