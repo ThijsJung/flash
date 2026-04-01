@@ -6,6 +6,7 @@ const state = {
   fullDeck: [],      // all cards fetched from the sheet
   deck: [],          // the sliced/shuffled session deck
   currentTab: '',
+  currentDeckTitle: '',
   currentDeckDesc: '',
   index: 0,
   known: 0,
@@ -115,15 +116,17 @@ async function fetchIndex(sheetId) {
   const json = await parseGviz(await res.text());
   const { headers, rows } = normalizeTable(json.table);
 
-  const deckIdx = headers.findIndex(h => h.toLowerCase() === 'deck');
-  const descIdx = headers.findIndex(h => h.toLowerCase() === 'description');
+  const idIdx    = headers.findIndex(h => h.toLowerCase() === 'id');
+  const titleIdx = headers.findIndex(h => h.toLowerCase() === 'title');
+  const descIdx  = headers.findIndex(h => h.toLowerCase() === 'description');
 
-  if (deckIdx === -1) throw new Error('First tab must have a "deck" column listing your deck names.');
+  if (idIdx === -1 || titleIdx === -1) throw new Error('First tab must have "id" and "title" columns.');
 
   return rows
-    .filter(row => row.c[deckIdx]?.v)
+    .filter(row => row.c[idIdx]?.v)
     .map(row => ({
-      name:        String(row.c[deckIdx].v),
+      id:          String(row.c[idIdx].v),
+      title:       String(row.c[titleIdx]?.v ?? ''),
       description: descIdx >= 0 ? String(row.c[descIdx]?.v ?? '') : '',
     }));
 }
@@ -183,22 +186,23 @@ async function handleLoadDecks() {
 // ── Deck picker ───────────────────────────────────────────────────────────
 function renderDeckList(decks) {
   el.deckList.innerHTML = '';
-  decks.forEach(({ name, description }) => {
+  decks.forEach(({ id, title, description }) => {
     const btn = document.createElement('button');
     btn.className = 'deck-item';
-    btn.innerHTML = `<span class="deck-item-name">${name}</span>${description ? `<span class="deck-item-desc">${description}</span>` : ''}`;
-    btn.addEventListener('click', () => handleSelectDeck(name, description));
+    btn.innerHTML = `<span class="deck-item-name">${title}</span>${description ? `<span class="deck-item-desc">${description}</span>` : ''}`;
+    btn.addEventListener('click', () => handleSelectDeck(id, title, description));
     el.deckList.appendChild(btn);
   });
 }
 
-async function handleSelectDeck(tabName, description) {
+async function handleSelectDeck(tabName, title, description) {
   try {
     const cards = await fetchCards(state.sheetId, tabName);
     if (cards.length === 0) {
       throw new Error('No cards found. Check that row 1 has "front" and "back" headers.');
     }
     state.currentTab = tabName;
+    state.currentDeckTitle = title;
     state.currentDeckDesc = description;
     state.fullDeck = cards;
     showReadyScreen();
@@ -211,7 +215,7 @@ async function handleSelectDeck(tabName, description) {
 function showReadyScreen() {
   const total = state.fullDeck.length;
 
-  el.readyDeckName.textContent = state.currentTab;
+  el.readyDeckName.textContent = state.currentDeckTitle;
   el.readyDeckDesc.textContent = state.currentDeckDesc;
   el.readyDeckDesc.classList.toggle('hidden', !state.currentDeckDesc);
 
