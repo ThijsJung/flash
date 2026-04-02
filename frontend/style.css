@@ -303,11 +303,16 @@ body {
 }
 
 /* ── Study Layout ───────────────────────────────────────────────────────── */
+#screen-decks,
+#screen-ready {
+  align-items: flex-start;
+}
+
 .study-layout {
   width: 100%;
   max-width: 480px;
   min-height: 100vh;
-  padding: 1.5rem;
+  padding: 2.5rem 1.5rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
