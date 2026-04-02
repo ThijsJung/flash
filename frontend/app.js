@@ -232,31 +232,25 @@ function showReadyScreen() {
   const defaultVal = total >= 20 ? 20 : total >= 10 ? 10 : total;
   state.selectedSize = defaultVal === total ? 0 : defaultVal;
 
-  const sliderLabel = val => val === total ? 'All' : String(val);
-
   el.sessionSizeOptions.innerHTML = `
     <div class="size-slider-wrap">
       <input type="range" id="session-size-slider" class="size-slider"
              min="1" max="${total}" value="${defaultVal}">
-      <span id="session-size-value" class="size-slider-value">${sliderLabel(defaultVal)}</span>
+      <span id="session-size-value" class="size-slider-value">${defaultVal} / ${total}</span>
     </div>
   `;
 
   document.getElementById('session-size-slider').addEventListener('input', e => {
     const val = Number(e.target.value);
     state.selectedSize = val === total ? 0 : val;
-    document.getElementById('session-size-value').textContent = sliderLabel(val);
+    document.getElementById('session-size-value').textContent = `${val} / ${total}`;
   });
 
   // Sync order toggle to current state
-  document.querySelectorAll('[data-order]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.order === (state.shuffled ? 'shuffled' : 'ordered'));
-  });
+  document.getElementById('toggle-shuffle').checked = state.shuffled;
 
   // Sync direction toggle to current state
-  document.querySelectorAll('[data-direction]').forEach(btn => {
-    btn.classList.toggle('active', btn.dataset.direction === (state.reversed ? 'reverse' : 'forward'));
-  });
+  document.getElementById('toggle-reverse').checked = state.reversed;
 
   showScreen('ready');
 }
@@ -351,22 +345,12 @@ el.btnBackUrl.addEventListener('click', () => showScreen('url'));
 el.btnBackReady.addEventListener('click', () => showScreen('decks'));
 el.btnStart.addEventListener('click', startSession);
 
-document.querySelectorAll('[data-order]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    state.shuffled = btn.dataset.order === 'shuffled';
-    document.querySelectorAll('[data-order]').forEach(b => {
-      b.classList.toggle('active', b === btn);
-    });
-  });
+document.getElementById('toggle-shuffle').addEventListener('change', e => {
+  state.shuffled = e.target.checked;
 });
 
-document.querySelectorAll('[data-direction]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    state.reversed = btn.dataset.direction === 'reverse';
-    document.querySelectorAll('[data-direction]').forEach(b => {
-      b.classList.toggle('active', b === btn);
-    });
-  });
+document.getElementById('toggle-reverse').addEventListener('change', e => {
+  state.reversed = e.target.checked;
 });
 
 el.btnBackDecks.addEventListener('click', () => showScreen('decks'));

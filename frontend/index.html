@@ -128,27 +128,15 @@
                         class="session-size-options"
                     ></div>
                 </div>
-                <div class="session-size-wrap">
-                    <p class="session-size-label">Order</p>
-                    <div class="session-size-options">
-                        <button class="size-btn active" data-order="shuffled">
-                            Shuffled
-                        </button>
-                        <button class="size-btn" data-order="ordered">
-                            In order
-                        </button>
-                    </div>
-                </div>
-                <div class="session-size-wrap">
-                    <p class="session-size-label">Direction</p>
-                    <div class="session-size-options">
-                        <button class="size-btn active" data-direction="forward">
-                            Front → Back
-                        </button>
-                        <button class="size-btn" data-direction="reverse">
-                            Back → Front
-                        </button>
-                    </div>
+                <div class="settings-row">
+                    <label class="toggle-row">
+                        <input type="checkbox" id="toggle-shuffle" checked>
+                        <span class="toggle-label">Shuffle</span>
+                    </label>
+                    <label class="toggle-row">
+                        <input type="checkbox" id="toggle-reverse">
+                        <span class="toggle-label">Back is question</span>
+                    </label>
                 </div>
                 <button id="btn-start" class="btn btn-primary">Start</button>
             </div>
