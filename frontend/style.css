@@ -11,9 +11,9 @@
   --primary:      #3D5AF1;
   --primary-dim:  #EEF0FD;
   --know:         #27AE60;
-  --know-dim:     #EAFAF1;
+  --know-dim:     #C8F0D8;
   --miss:         #E74C3C;
-  --miss-dim:     #FDEDEC;
+  --miss-dim:     #F9CECA;
   --text:         #1A1A2E;
   --muted:        #8892A4;
   --border:       #E5E0D8;
@@ -477,7 +477,7 @@ body {
 }
 
 .btn-miss:hover {
-  border-color: var(--miss);
+  opacity: 0.85;
 }
 
 .btn-know {
@@ -488,7 +488,7 @@ body {
 }
 
 .btn-know:hover {
-  border-color: var(--know);
+  opacity: 0.85;
 }
 
 /* ── Recent decks label ─────────────────────────────────────────────────── */
