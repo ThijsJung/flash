@@ -372,9 +372,6 @@ document.querySelectorAll('[data-direction]').forEach(btn => {
 el.btnBackDecks.addEventListener('click', () => showScreen('decks'));
 
 el.card.addEventListener('click', flipCard);
-el.card.addEventListener('keydown', e => {
-  if (e.key === ' ' || e.key === 'Enter') { e.preventDefault(); flipCard(); }
-});
 
 el.btnKnow.addEventListener('click', () => handleAnswer(true));
 el.btnMiss.addEventListener('click', () => handleAnswer(false));
@@ -383,9 +380,12 @@ el.btnRepeat.addEventListener('click', repeatSession);
 el.btnStudyAgain.addEventListener('click', () => showReadyScreen());
 el.btnPickDeck.addEventListener('click', () => showScreen('decks'));
 
-// Keyboard shortcuts during study (right = know it, left = still learning)
+// Keyboard shortcuts during study
+// Space/Enter flips the card; arrow keys rate it (only available after flip)
 document.addEventListener('keydown', e => {
-  if (!screens.study.classList.contains('active') || !state.flipped) return;
+  if (!screens.study.classList.contains('active')) return;
+  if ((e.key === ' ' || e.key === 'Enter') && !state.flipped) { e.preventDefault(); flipCard(); return; }
+  if (!state.flipped) return;
   if (e.key === 'ArrowRight') handleAnswer(true);
   if (e.key === 'ArrowLeft')  handleAnswer(false);
 });
