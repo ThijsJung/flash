@@ -228,23 +228,25 @@ function showReadyScreen() {
   el.readyDeckDesc.textContent = state.currentDeckDesc;
   el.readyDeckDesc.classList.toggle('hidden', !state.currentDeckDesc);
 
-  // Build size options: 10 and 20 only shown if deck is large enough
-  const sizes = [10, 20].filter(n => n < total);
-  const options = [...sizes, 0]; // 0 = All
+  // Build size slider
+  const defaultVal = total >= 20 ? 20 : total >= 10 ? 10 : total;
+  state.selectedSize = defaultVal === total ? 0 : defaultVal;
 
-  el.sessionSizeOptions.innerHTML = '';
-  options.forEach(size => {
-    const btn = document.createElement('button');
-    btn.className = 'size-btn';
-    btn.textContent = size === 0 ? `All (${total})` : String(size);
-    btn.dataset.size = size;
-    btn.addEventListener('click', () => selectSize(size));
-    el.sessionSizeOptions.appendChild(btn);
+  const sliderLabel = val => val === total ? 'All' : String(val);
+
+  el.sessionSizeOptions.innerHTML = `
+    <div class="size-slider-wrap">
+      <input type="range" id="session-size-slider" class="size-slider"
+             min="1" max="${total}" value="${defaultVal}">
+      <span id="session-size-value" class="size-slider-value">${sliderLabel(defaultVal)}</span>
+    </div>
+  `;
+
+  document.getElementById('session-size-slider').addEventListener('input', e => {
+    const val = Number(e.target.value);
+    state.selectedSize = val === total ? 0 : val;
+    document.getElementById('session-size-value').textContent = sliderLabel(val);
   });
-
-  // Default: 20 if available, else 10, else All
-  const defaultSize = sizes.includes(20) ? 20 : sizes.includes(10) ? 10 : 0;
-  selectSize(defaultSize);
 
   // Sync order toggle to current state
   document.querySelectorAll('[data-order]').forEach(btn => {
@@ -254,12 +256,6 @@ function showReadyScreen() {
   showScreen('ready');
 }
 
-function selectSize(size) {
-  state.selectedSize = size;
-  el.sessionSizeOptions.querySelectorAll('.size-btn').forEach(btn => {
-    btn.classList.toggle('active', Number(btn.dataset.size) === size);
-  });
-}
 
 // ── Study session ─────────────────────────────────────────────────────────
 function startSession() {

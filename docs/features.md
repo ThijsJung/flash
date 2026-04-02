@@ -7,7 +7,6 @@
 ## Study
 
 - **Reverse cards** — study back to front instead of front to back
-- **Session size slider** — replace the fixed size buttons (10 / 20 / All) with a slider for picking any number of cards
 
 ## Deck picker
 
