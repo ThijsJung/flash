@@ -61,15 +61,27 @@ flash/
 
 ---
 
-## ADR-006: Backend deferred — AWS vs. Supabase TBD
+## ADR-006: Backend — Supabase
 
-**Decision:** No backend for MVP. Backend technology choice is open.
+**Decision:** Supabase for database, auth, and API when the backend is built.
 
-**Candidates:**
-- **AWS** (Lambda + API Gateway + DynamoDB/RDS + Cognito) — familiar ecosystem, full control
-- **Supabase** — auth + database + REST API with near-zero infra overhead
+**Reasoning:**
+- Postgres handles spaced repetition queries (e.g. cards due before date X) trivially, without the composite index workarounds Firestore requires
+- Auth is significantly better DX than Cognito, which has been painful in other contexts
+- Auto-generated REST API means no API Gateway / Lambda layer needed for standard CRUD
+- CLI-based migration workflow keeps schema changes in git
+- Local Docker stack (`supabase start`) provides a proper dev environment without a second cloud project, working around the free tier's 2-project limit
+- Flat monthly cost ($25/month Pro if needed) scales comfortably to hundreds of users without surprise bills; free tier is viable while the course is actively running
+- Media (images, audio) will be hosted on S3 + CloudFront and referenced by URL, keeping Supabase storage usage minimal
 
-**Triggers for decision:** implementing spaced repetition (requires persistence) or user accounts (requires auth).
+**Data model:** `collections → decks → cards`, with a separate `reviews` table for per-user spaced repetition state (interval, ease factor, due date).
+
+**Ruled out:**
+- AWS (Lambda + API Gateway + DynamoDB + Cognito) — familiar but Cognito DX is a known pain point; no meaningful cost advantage at this scale
+- Firebase — Firestore query limitations for date-range queries; no SQL experience gained
+- Long-running servers (Heroku, Render, Fly.io) — unnecessary for this workload
+
+**Triggers for revisiting:** Supabase pricing changes materially, or the project scales beyond what the Pro tier handles comfortably.
 
 ---
 
