@@ -72,11 +72,13 @@
                     }),
                     (e.__SV = 1));
             })(document, window.posthog || []);
-            posthog.init("phc_A25tbCt8FbEwYtJkDjNUgeRyAZvVdzw6izjZFRrErQZD", {
-                api_host: "https://eu.i.posthog.com",
-                person_profiles: "identified_only",
-                autocapture: false,
-            });
+            if (location.hostname === "thijsjung.github.io") {
+                posthog.init("phc_A25tbCt8FbEwYtJkDjNUgeRyAZvVdzw6izjZFRrErQZD", {
+                    api_host: "https://eu.i.posthog.com",
+                    person_profiles: "identified_only",
+                    autocapture: false,
+                });
+            }
         </script>
     </head>
     <body>
