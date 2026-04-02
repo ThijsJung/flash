@@ -1,5 +1,10 @@
 const STORAGE_KEY = 'flash_sheet_url';
 
+// ── Analytics ─────────────────────────────────────────────────────────────
+function track(event, props) {
+  if (window.posthog) posthog.capture(event, props);
+}
+
 // ── State ────────────────────────────────────────────────────────────────
 const state = {
   sheetId: '',
@@ -173,9 +178,11 @@ async function handleLoadDecks() {
     const decks = await fetchIndex(sheetId);
     state.sheetId = sheetId;
     localStorage.setItem(STORAGE_KEY, url);
+    track('sheet_loaded', { sheet_id: sheetId, deck_count: decks.length });
     renderDeckList(decks);
     showScreen('decks');
   } catch (e) {
+    track('sheet_load_error', { message: e.message });
     showUrlError(e.message);
   } finally {
     el.btnLoad.disabled = false;
@@ -205,6 +212,7 @@ async function handleSelectDeck(tabName, title, description) {
     state.currentDeckTitle = title;
     state.currentDeckDesc = description;
     state.fullDeck = cards;
+    track('deck_selected', { deck: title, card_count: cards.length });
     showReadyScreen();
   } catch (e) {
     alert(e.message);
@@ -258,6 +266,7 @@ function startSession() {
   state.deck = state.selectedSize === 0 ? ordered : ordered.slice(0, state.selectedSize);
   state.index = 0;
   state.known = 0;
+  track('session_started', { deck: state.currentDeckTitle, deck_size: state.deck.length, shuffled: state.shuffled });
   showScreen('study');
   showCard(0);
 }
@@ -298,11 +307,13 @@ function flipCard() {
     if (!state.hasFlipped) {
       state.hasFlipped = true;
       el.cardHint.textContent = 'tap to flip';
+      track('card_flipped', { deck: state.currentDeckTitle, card_index: state.index });
     }
   }
 }
 
 function handleAnswer(known) {
+  track('card_rated', { deck: state.currentDeckTitle, card_index: state.index, result: known ? 'know' : 'learning' });
   if (known) state.known++;
   state.index++;
 
@@ -316,6 +327,7 @@ function handleAnswer(known) {
 
 // ── Summary ───────────────────────────────────────────────────────────────
 function showSummary() {
+  track('session_completed', { deck: state.currentDeckTitle, score: state.known, total: state.deck.length });
   el.summaryScoreNum.textContent = `${state.known} / ${state.deck.length}`;
   showScreen('summary');
 }

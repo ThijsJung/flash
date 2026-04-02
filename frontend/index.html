@@ -1,104 +1,201 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Flash</title>
-  <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-  <!-- Screen: URL Input -->
-  <div id="screen-url" class="screen active">
-    <div class="container">
-      <h1 class="logo">Flash</h1>
-      <p class="tagline">Your decks, your way.</p>
-      <div class="input-group">
-        <label for="sheet-url">Google Sheets URL</label>
-        <input type="url" id="sheet-url" placeholder="https://docs.google.com/spreadsheets/d/..." autocomplete="off" spellcheck="false">
-      </div>
-      <button id="btn-load" class="btn btn-primary">Load decks</button>
-      <p id="url-error" class="error hidden"></p>
-    </div>
-  </div>
-
-  <!-- Screen: Deck Picker -->
-  <div id="screen-decks" class="screen">
-    <div class="container">
-      <button id="btn-back-url" class="btn-back">← Back</button>
-      <h2>Choose a deck</h2>
-      <div id="deck-list" class="deck-list"></div>
-    </div>
-  </div>
-
-  <!-- Screen: Ready -->
-  <div id="screen-ready" class="screen">
-    <div class="container">
-      <button id="btn-back-ready" class="btn-back">← Decks</button>
-      <div class="ready-info">
-        <h2 id="ready-deck-name"></h2>
-        <p id="ready-deck-desc" class="ready-deck-desc"></p>
-      </div>
-      <div class="session-size-wrap">
-        <p class="session-size-label">How many cards?</p>
-        <div id="session-size-options" class="session-size-options"></div>
-      </div>
-      <div class="session-size-wrap">
-        <p class="session-size-label">Order</p>
-        <div class="session-size-options">
-          <button class="size-btn active" data-order="shuffled">Shuffled</button>
-          <button class="size-btn" data-order="ordered">In order</button>
-        </div>
-      </div>
-      <button id="btn-start" class="btn btn-primary">Start</button>
-    </div>
-  </div>
-
-  <!-- Screen: Study -->
-  <div id="screen-study" class="screen">
-    <div class="study-layout">
-      <div class="study-header">
-        <button id="btn-back-decks" class="btn-back">← Decks</button>
-        <span id="progress-text" class="progress-text">0 / 0</span>
-      </div>
-      <div class="progress-bar-wrap">
-        <div id="progress-bar" class="progress-bar"></div>
-      </div>
-      <div class="card-wrap">
-        <div id="card" class="card" role="button" tabindex="0" aria-label="Flip card">
-          <div class="card-inner">
-            <div class="card-front">
-              <p id="card-front-text" class="card-text"></p>
-              <span class="card-hint">tap to reveal</span>
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Flash</title>
+        <link rel="stylesheet" href="style.css" />
+        <!-- PostHog analytics & error tracking -->
+        <script>
+            !(function (t, e) {
+                var o, n, p, r;
+                e.__SV ||
+                    ((window.posthog = e),
+                    (e._i = []),
+                    (e.init = function (i, s, a) {
+                        function g(t, e) {
+                            var o = e.split(".");
+                            (2 == o.length && ((t = t[o[0]]), (e = o[1])),
+                                (t[e] = function () {
+                                    t.push(
+                                        [e].concat(
+                                            Array.prototype.slice.call(
+                                                arguments,
+                                                0,
+                                            ),
+                                        ),
+                                    );
+                                }));
+                        }
+                        (((p = t.createElement("script")).type =
+                            "text/javascript"),
+                            (p.crossOrigin = "anonymous"),
+                            (p.async = !0),
+                            (p.src =
+                                s.api_host.replace(
+                                    ".i.posthog.com",
+                                    "-assets.i.posthog.com",
+                                ) + "/static/array.js"),
+                            (r =
+                                t.getElementsByTagName(
+                                    "script",
+                                )[0]).parentNode.insertBefore(p, r));
+                        var u = e;
+                        for (
+                            void 0 !== a ? (u = e[a] = []) : (a = "posthog"),
+                                u.people = u.people || [],
+                                u.toString = function (t) {
+                                    var e = "posthog";
+                                    return (
+                                        "posthog" !== a && (e += "." + a),
+                                        t || (e += " (stub)"),
+                                        e
+                                    );
+                                },
+                                u.people.toString = function () {
+                                    return u.toString() + " (stub)";
+                                },
+                                o =
+                                    "init capture register register_once register_for_session unregister unregister_for_session getFeatureFlag getFeatureFlagPayload isFeatureFlagEnabled reloadFeatureFlags updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures on onFeatureFlags onSessionId getSurveys getActiveMatchingSurveys renderSurvey canRenderSurvey identify setPersonProperties group resetGroups setPersonPropertiesForFlags resetPersonPropertiesForFlags setGroupPropertiesForFlags resetGroupPropertiesForFlags reset get_distinct_id getGroups get_session_id get_session_replay_url alias set_config startSessionRecording stopSessionRecording sessionRecordingStarted captureException loadToolbar get_property getSessionProperty createPersonProfile opt_in_capturing opt_out_capturing has_opted_in_capturing has_opted_out_capturing clear_opt_in_out_capturing debug".split(
+                                        " ",
+                                    ),
+                                n = 0;
+                            n < o.length;
+                            n++
+                        )
+                            g(u, o[n]);
+                        e._i.push([i, s, a]);
+                    }),
+                    (e.__SV = 1));
+            })(document, window.posthog || []);
+            posthog.init("phc_A25tbCt8FbEwYtJkDjNUgeRyAZvVdzw6izjZFRrErQZD", {
+                api_host: "https://eu.i.posthog.com",
+                person_profiles: "identified_only",
+                autocapture: false,
+            });
+        </script>
+    </head>
+    <body>
+        <!-- Screen: URL Input -->
+        <div id="screen-url" class="screen active">
+            <div class="container">
+                <h1 class="logo">Flash</h1>
+                <p class="tagline">Your decks, your way.</p>
+                <div class="input-group">
+                    <label for="sheet-url">Google Sheets URL</label>
+                    <input
+                        type="url"
+                        id="sheet-url"
+                        placeholder="https://docs.google.com/spreadsheets/d/..."
+                        autocomplete="off"
+                        spellcheck="false"
+                    />
+                </div>
+                <button id="btn-load" class="btn btn-primary">
+                    Load decks
+                </button>
+                <p id="url-error" class="error hidden"></p>
             </div>
-            <div class="card-back">
-              <p id="card-back-text" class="card-text"></p>
-              <p id="card-notes-text" class="card-notes"></p>
-              <span class="card-hint">tap to flip</span>
-            </div>
-          </div>
         </div>
-      </div>
-      <div id="answer-buttons" class="answer-buttons">
-        <button id="btn-miss" class="btn btn-miss">Still learning</button>
-        <button id="btn-know" class="btn btn-know">Know it</button>
-      </div>
-    </div>
-  </div>
 
-  <!-- Screen: Summary -->
-  <div id="screen-summary" class="screen">
-    <div class="container">
-      <h2 class="summary-title">Session complete</h2>
-      <div class="summary-score-wrap">
-        <p id="summary-score-num" class="summary-score-num"></p>
-        <p class="summary-score-label">cards known</p>
-      </div>
-      <button id="btn-study-again" class="btn btn-primary">Study again</button>
-      <button id="btn-pick-deck" class="btn btn-secondary">Pick another deck</button>
-    </div>
-  </div>
+        <!-- Screen: Deck Picker -->
+        <div id="screen-decks" class="screen">
+            <div class="container">
+                <button id="btn-back-url" class="btn-back">← Back</button>
+                <h2>Choose a deck</h2>
+                <div id="deck-list" class="deck-list"></div>
+            </div>
+        </div>
 
-  <script src="app.js"></script>
-</body>
+        <!-- Screen: Ready -->
+        <div id="screen-ready" class="screen">
+            <div class="container">
+                <button id="btn-back-ready" class="btn-back">← Decks</button>
+                <div class="ready-info">
+                    <h2 id="ready-deck-name"></h2>
+                    <p id="ready-deck-desc" class="ready-deck-desc"></p>
+                </div>
+                <div class="session-size-wrap">
+                    <p class="session-size-label">How many cards?</p>
+                    <div
+                        id="session-size-options"
+                        class="session-size-options"
+                    ></div>
+                </div>
+                <div class="session-size-wrap">
+                    <p class="session-size-label">Order</p>
+                    <div class="session-size-options">
+                        <button class="size-btn active" data-order="shuffled">
+                            Shuffled
+                        </button>
+                        <button class="size-btn" data-order="ordered">
+                            In order
+                        </button>
+                    </div>
+                </div>
+                <button id="btn-start" class="btn btn-primary">Start</button>
+            </div>
+        </div>
+
+        <!-- Screen: Study -->
+        <div id="screen-study" class="screen">
+            <div class="study-layout">
+                <div class="study-header">
+                    <button id="btn-back-decks" class="btn-back">
+                        ← Decks
+                    </button>
+                    <span id="progress-text" class="progress-text">0 / 0</span>
+                </div>
+                <div class="progress-bar-wrap">
+                    <div id="progress-bar" class="progress-bar"></div>
+                </div>
+                <div class="card-wrap">
+                    <div
+                        id="card"
+                        class="card"
+                        role="button"
+                        tabindex="0"
+                        aria-label="Flip card"
+                    >
+                        <div class="card-inner">
+                            <div class="card-front">
+                                <p id="card-front-text" class="card-text"></p>
+                                <span class="card-hint">tap to reveal</span>
+                            </div>
+                            <div class="card-back">
+                                <p id="card-back-text" class="card-text"></p>
+                                <p id="card-notes-text" class="card-notes"></p>
+                                <span class="card-hint">tap to flip</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div id="answer-buttons" class="answer-buttons">
+                    <button id="btn-miss" class="btn btn-miss">
+                        Still learning
+                    </button>
+                    <button id="btn-know" class="btn btn-know">Know it</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen: Summary -->
+        <div id="screen-summary" class="screen">
+            <div class="container">
+                <h2 class="summary-title">Session complete</h2>
+                <div class="summary-score-wrap">
+                    <p id="summary-score-num" class="summary-score-num"></p>
+                    <p class="summary-score-label">cards known</p>
+                </div>
+                <button id="btn-study-again" class="btn btn-primary">
+                    Study again
+                </button>
+                <button id="btn-pick-deck" class="btn btn-secondary">
+                    Pick another deck
+                </button>
+            </div>
+        </div>
+
+        <script src="app.js"></script>
+    </body>
 </html>
