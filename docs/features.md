@@ -1,9 +1,5 @@
 # Flash — Feature backlog
 
-## Bugs
-
-- **Keyboard shortcuts broken on desktop** — arrow key shortcuts during study are not working
-
 ## Study
 
 ## Deck picker
