@@ -304,7 +304,8 @@ body {
 
 /* ── Study Layout ───────────────────────────────────────────────────────── */
 #screen-decks,
-#screen-ready {
+#screen-ready,
+#screen-summary {
   align-items: flex-start;
 }
 
@@ -476,7 +477,7 @@ body {
 
 /* ── Summary Screen ─────────────────────────────────────────────────────── */
 .summary-title {
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.5px;
 }
