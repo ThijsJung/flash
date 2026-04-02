@@ -54,6 +54,7 @@ const el = {
   btnKnow:            document.getElementById('btn-know'),
   btnMiss:            document.getElementById('btn-miss'),
   summaryScoreNum:    document.getElementById('summary-score-num'),
+  btnRepeat:          document.getElementById('btn-repeat'),
   btnStudyAgain:      document.getElementById('btn-study-again'),
   btnPickDeck:        document.getElementById('btn-pick-deck'),
 };
@@ -326,6 +327,15 @@ function handleAnswer(known) {
 }
 
 // ── Summary ───────────────────────────────────────────────────────────────
+function repeatSession() {
+  if (state.shuffled) state.deck = shuffle(state.deck);
+  state.index = 0;
+  state.known = 0;
+  track('session_started', { deck: state.currentDeckTitle, deck_size: state.deck.length, shuffled: state.shuffled });
+  showScreen('study');
+  showCard(0);
+}
+
 function showSummary() {
   track('session_completed', { deck: state.currentDeckTitle, score: state.known, total: state.deck.length });
   el.summaryScoreNum.textContent = `${state.known} / ${state.deck.length}`;
@@ -359,6 +369,7 @@ el.card.addEventListener('keydown', e => {
 el.btnKnow.addEventListener('click', () => handleAnswer(true));
 el.btnMiss.addEventListener('click', () => handleAnswer(false));
 
+el.btnRepeat.addEventListener('click', repeatSession);
 el.btnStudyAgain.addEventListener('click', () => showReadyScreen());
 el.btnPickDeck.addEventListener('click', () => showScreen('decks'));
 
