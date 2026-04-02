@@ -8,9 +8,9 @@ function track(event, props) {
 // ── State ────────────────────────────────────────────────────────────────
 const state = {
   sheetId: '',
-  fullDeck: [],      // all cards fetched from the sheet
+  allCards: [],      // all cards fetched from the cards tab
+  fullDeck: [],      // cards for the selected deck
   deck: [],          // the sliced/shuffled session deck
-  currentTab: '',
   currentDeckTitle: '',
   currentDeckDesc: '',
   index: 0,
@@ -138,8 +138,8 @@ async function fetchIndex(sheetId) {
     }));
 }
 
-async function fetchCards(sheetId, tabName) {
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tabName)}`;
+async function fetchCards(sheetId) {
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=cards`;
   const res = await fetch(url);
   if (!res.ok) throw new Error('Could not reach Google Sheets. Check your internet connection.');
 
@@ -147,20 +147,22 @@ async function fetchCards(sheetId, tabName) {
   const { headers, rows } = normalizeTable(json.table);
 
   const idx = label => headers.findIndex(h => h.toLowerCase() === label.toLowerCase());
-  const frontIdx = idx('front');
-  const backIdx  = idx('back');
-  const notesIdx = idx('notes');
+  const frontIdx  = idx('front');
+  const backIdx   = idx('back');
+  const notesIdx  = idx('notes');
+  const deckIdx   = idx('deck_id');
 
-  if (frontIdx === -1 || backIdx === -1) {
-    throw new Error('Tab must have "front" and "back" column headers in row 1.');
+  if (frontIdx === -1 || backIdx === -1 || deckIdx === -1) {
+    throw new Error('"cards" tab must have "front", "back", and "deck_id" column headers.');
   }
 
   return rows
     .filter(row => row.c[frontIdx]?.v)
     .map(row => ({
-      front: String(row.c[frontIdx].v),
-      back:  String(row.c[backIdx]?.v  ?? ''),
-      notes: notesIdx >= 0 ? String(row.c[notesIdx]?.v ?? '') : '',
+      front:   String(row.c[frontIdx].v),
+      back:    String(row.c[backIdx]?.v  ?? ''),
+      notes:   notesIdx >= 0 ? String(row.c[notesIdx]?.v ?? '') : '',
+      deck_id: String(row.c[deckIdx]?.v  ?? ''),
     }));
 }
 
@@ -177,8 +179,9 @@ async function handleLoadDecks() {
   el.btnLoad.textContent = 'Loading...';
 
   try {
-    const decks = await fetchIndex(sheetId);
+    const [decks, allCards] = await Promise.all([fetchIndex(sheetId), fetchCards(sheetId)]);
     state.sheetId = sheetId;
+    state.allCards = allCards;
     localStorage.setItem(STORAGE_KEY, url);
     track('sheet_loaded', { sheet_id: sheetId, deck_count: decks.length });
     renderDeckList(decks);
@@ -204,21 +207,17 @@ function renderDeckList(decks) {
   });
 }
 
-async function handleSelectDeck(tabName, title, description) {
-  try {
-    const cards = await fetchCards(state.sheetId, tabName);
-    if (cards.length === 0) {
-      throw new Error('No cards found. Check that row 1 has "front" and "back" headers.');
-    }
-    state.currentTab = tabName;
-    state.currentDeckTitle = title;
-    state.currentDeckDesc = description;
-    state.fullDeck = cards;
-    track('deck_selected', { deck: title, card_count: cards.length });
-    showReadyScreen();
-  } catch (e) {
-    alert(e.message);
+function handleSelectDeck(id, title, description) {
+  const cards = state.allCards.filter(c => c.deck_id === id);
+  if (cards.length === 0) {
+    alert(`No cards found for deck "${title}". Check that the "cards" tab has matching deck_id values.`);
+    return;
   }
+  state.currentDeckTitle = title;
+  state.currentDeckDesc = description;
+  state.fullDeck = cards;
+  track('deck_selected', { deck: title, card_count: cards.length });
+  showReadyScreen();
 }
 
 // ── Ready screen ──────────────────────────────────────────────────────────
