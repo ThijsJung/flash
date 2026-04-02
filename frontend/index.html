@@ -11,6 +11,7 @@
         <link rel="stylesheet" href="style.css" />
         <!-- PostHog analytics & error tracking -->
         <script>
+          if (location.hostname === "thijsjung.github.io") {
             !(function (t, e) {
                 var o, n, p, r;
                 e.__SV ||
@@ -72,13 +73,12 @@
                     }),
                     (e.__SV = 1));
             })(document, window.posthog || []);
-            if (location.hostname === "thijsjung.github.io") {
-                posthog.init("phc_A25tbCt8FbEwYtJkDjNUgeRyAZvVdzw6izjZFRrErQZD", {
-                    api_host: "https://eu.i.posthog.com",
-                    person_profiles: "identified_only",
-                    autocapture: false,
-                });
-            }
+            posthog.init("phc_A25tbCt8FbEwYtJkDjNUgeRyAZvVdzw6izjZFRrErQZD", {
+                api_host: "https://eu.i.posthog.com",
+                person_profiles: "identified_only",
+                autocapture: false,
+            });
+          }
         </script>
     </head>
     <body>
