@@ -4,10 +4,6 @@
 
 - **Keyboard shortcuts broken on desktop** — arrow key shortcuts during study are not working
 
-## Study
-
-- **Reverse cards** — study back to front instead of front to back
-
 ## Deck picker
 
 - **Search decks** — filter the deck list by name or description

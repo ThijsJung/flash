@@ -19,6 +19,7 @@ const state = {
   hasFlipped: false,
   selectedSize: 0,   // 0 = All
   shuffled: true,
+  reversed: false,
 };
 
 // ── DOM refs ─────────────────────────────────────────────────────────────
@@ -253,6 +254,11 @@ function showReadyScreen() {
     btn.classList.toggle('active', btn.dataset.order === (state.shuffled ? 'shuffled' : 'ordered'));
   });
 
+  // Sync direction toggle to current state
+  document.querySelectorAll('[data-direction]').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.direction === (state.reversed ? 'reverse' : 'forward'));
+  });
+
   showScreen('ready');
 }
 
@@ -263,7 +269,7 @@ function startSession() {
   state.deck = state.selectedSize === 0 ? ordered : ordered.slice(0, state.selectedSize);
   state.index = 0;
   state.known = 0;
-  track('session_started', { deck: state.currentDeckTitle, deck_size: state.deck.length, shuffled: state.shuffled });
+  track('session_started', { deck: state.currentDeckTitle, deck_size: state.deck.length, shuffled: state.shuffled, reversed: state.reversed });
   showScreen('study');
   showCard(0);
 }
@@ -285,8 +291,8 @@ function showCard(index) {
   el.cardInner.offsetHeight; // force reflow before restoring transition
   el.cardInner.style.transition = '';
 
-  el.cardFrontText.textContent = card.front;
-  el.cardBackText.textContent  = card.back;
+  el.cardFrontText.textContent = state.reversed ? card.back  : card.front;
+  el.cardBackText.textContent  = state.reversed ? card.front : card.back;
   el.cardNotesText.textContent = card.notes;
   el.cardNotesText.classList.toggle('hidden', !card.notes);
   el.answerButtons.classList.remove('visible');
@@ -350,6 +356,15 @@ document.querySelectorAll('[data-order]').forEach(btn => {
   btn.addEventListener('click', () => {
     state.shuffled = btn.dataset.order === 'shuffled';
     document.querySelectorAll('[data-order]').forEach(b => {
+      b.classList.toggle('active', b === btn);
+    });
+  });
+});
+
+document.querySelectorAll('[data-direction]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    state.reversed = btn.dataset.direction === 'reverse';
+    document.querySelectorAll('[data-direction]').forEach(b => {
       b.classList.toggle('active', b === btn);
     });
   });
