@@ -126,6 +126,7 @@ async function fetchIndex(sheetId) {
   const idIdx    = headers.findIndex(h => h.toLowerCase() === 'id');
   const titleIdx = headers.findIndex(h => h.toLowerCase() === 'title');
   const descIdx  = headers.findIndex(h => h.toLowerCase() === 'description');
+  const groupIdx = headers.findIndex(h => h.toLowerCase() === 'group');
 
   if (idIdx === -1 || titleIdx === -1) throw new Error('First tab must have "id" and "title" columns.');
 
@@ -135,6 +136,7 @@ async function fetchIndex(sheetId) {
       id:          String(row.c[idIdx].v),
       title:       String(row.c[titleIdx]?.v ?? ''),
       description: descIdx >= 0 ? String(row.c[descIdx]?.v ?? '') : '',
+      group:       groupIdx >= 0 ? String(row.c[groupIdx]?.v ?? '') : '',
     }));
 }
 
@@ -196,15 +198,64 @@ async function handleLoadDecks() {
 }
 
 // ── Deck picker ───────────────────────────────────────────────────────────
+function makeDeckButton({ id, title, description }) {
+  const btn = document.createElement('button');
+  btn.className = 'deck-item';
+  btn.innerHTML = `<span class="deck-item-name">${title}</span>${description ? `<span class="deck-item-desc">${description}</span>` : ''}`;
+  btn.addEventListener('click', () => handleSelectDeck(id, title, description));
+  return btn;
+}
+
 function renderDeckList(decks) {
   el.deckList.innerHTML = '';
-  decks.forEach(({ id, title, description }) => {
-    const btn = document.createElement('button');
-    btn.className = 'deck-item';
-    btn.innerHTML = `<span class="deck-item-name">${title}</span>${description ? `<span class="deck-item-desc">${description}</span>` : ''}`;
-    btn.addEventListener('click', () => handleSelectDeck(id, title, description));
-    el.deckList.appendChild(btn);
+
+  const grouped = [];
+  const groupOrder = [];
+  const groupMap = {};
+  const ungrouped = [];
+
+  decks.forEach(deck => {
+    if (!deck.group) {
+      ungrouped.push(deck);
+    } else {
+      if (!groupMap[deck.group]) {
+        groupMap[deck.group] = [];
+        groupOrder.push(deck.group);
+      }
+      groupMap[deck.group].push(deck);
+    }
   });
+
+  groupOrder.forEach(name => {
+    const decksInGroup = groupMap[name];
+
+    if (decksInGroup.length === 1) {
+      ungrouped.unshift(decksInGroup[0]);
+      return;
+    }
+
+    const wrap = document.createElement('div');
+    wrap.className = 'deck-group';
+
+    const header = document.createElement('button');
+    header.className = 'deck-group-header';
+    header.innerHTML = `<span>${name}</span><span class="deck-group-chevron">▸</span>`;
+
+    const items = document.createElement('div');
+    items.className = 'deck-group-items';
+    decksInGroup.forEach(deck => items.appendChild(makeDeckButton(deck)));
+
+    header.addEventListener('click', () => {
+      const open = wrap.classList.toggle('open');
+      header.querySelector('.deck-group-chevron').textContent = open ? '▾' : '▸';
+    });
+
+    wrap.appendChild(header);
+    wrap.appendChild(items);
+    el.deckList.appendChild(wrap);
+  });
+
+  ungrouped.forEach(deck => el.deckList.appendChild(makeDeckButton(deck)));
 }
 
 function handleSelectDeck(id, title, description) {

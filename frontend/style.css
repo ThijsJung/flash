@@ -205,6 +205,60 @@ body {
   font-weight: 400;
 }
 
+.deck-group-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-lg);
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--text);
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.deck-group-header:hover {
+  border-color: var(--primary);
+}
+
+.deck-group.open .deck-group-header {
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  border-bottom-color: var(--border);
+}
+
+.deck-group-items {
+  display: none;
+  flex-direction: column;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-top: none;
+  border-bottom-left-radius: var(--radius-lg);
+  border-bottom-right-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.deck-group.open .deck-group-items {
+  display: flex;
+}
+
+.deck-group-items .deck-item {
+  border: none;
+  border-top: 1px solid var(--border);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.deck-group-items .deck-item:hover {
+  transform: none;
+  box-shadow: none;
+  background: var(--primary-dim);
+}
+
 /* ── Ready Screen ───────────────────────────────────────────────────────── */
 .ready-info {
   display: flex;
