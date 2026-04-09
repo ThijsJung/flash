@@ -205,20 +205,34 @@ body {
   font-weight: 400;
 }
 
+.deck-group-solo-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding: 0 0.25rem;
+  margin-bottom: -0.25rem;
+}
+
 .deck-group-header {
   width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.25rem;
-  background: var(--surface);
+  padding: 0.75rem 1.25rem;
+  background: var(--primary-dim);
   border: 2px solid var(--border);
   border-radius: var(--radius-lg);
-  font-size: 1.0625rem;
-  font-weight: 700;
-  color: var(--text);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  color: var(--muted);
   cursor: pointer;
   transition: border-color 0.2s;
+}
+
+.deck-group-count {
+  font-weight: 400;
 }
 
 .deck-group-header:hover {

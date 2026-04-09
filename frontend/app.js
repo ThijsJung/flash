@@ -230,7 +230,11 @@ function renderDeckList(decks) {
     const decksInGroup = groupMap[name];
 
     if (decksInGroup.length === 1) {
-      ungrouped.unshift(decksInGroup[0]);
+      const label = document.createElement('div');
+      label.className = 'deck-group-solo-label';
+      label.textContent = name;
+      el.deckList.appendChild(label);
+      el.deckList.appendChild(makeDeckButton(decksInGroup[0]));
       return;
     }
 
@@ -239,7 +243,7 @@ function renderDeckList(decks) {
 
     const header = document.createElement('button');
     header.className = 'deck-group-header';
-    header.innerHTML = `<span>${name}</span><span class="deck-group-chevron">▸</span>`;
+    header.innerHTML = `<span>${name} <span class="deck-group-count">(${decksInGroup.length})</span></span><span class="deck-group-chevron">▸</span>`;
 
     const items = document.createElement('div');
     items.className = 'deck-group-items';
