@@ -8,6 +8,7 @@ function track(event, props) {
 // ── State ────────────────────────────────────────────────────────────────
 const state = {
   sheetId: '',
+  loadedDecks: [],   // decks fetched from the index tab
   allCards: [],      // all cards fetched from the cards tab
   fullDeck: [],      // cards for the selected deck
   deck: [],          // the sliced/shuffled session deck
@@ -36,6 +37,8 @@ const el = {
   btnLoad:            document.getElementById('btn-load'),
   urlError:           document.getElementById('url-error'),
   btnBackUrl:         document.getElementById('btn-back-url'),
+  groupFilterWrap:    document.getElementById('group-filter-wrap'),
+  groupFilter:        document.getElementById('group-filter'),
   deckList:           document.getElementById('deck-list'),
   btnBackReady:       document.getElementById('btn-back-ready'),
   readyDeckName:      document.getElementById('ready-deck-name'),
@@ -207,59 +210,38 @@ function makeDeckButton({ id, title, description }) {
 }
 
 function renderDeckList(decks) {
-  el.deckList.innerHTML = '';
+  state.loadedDecks = decks;
 
-  const grouped = [];
   const groupOrder = [];
-  const groupMap = {};
-  const ungrouped = [];
-
+  const groupCounts = {};
   decks.forEach(deck => {
-    if (!deck.group) {
-      ungrouped.push(deck);
-    } else {
-      if (!groupMap[deck.group]) {
-        groupMap[deck.group] = [];
+    if (deck.group) {
+      if (!groupCounts[deck.group]) {
+        groupCounts[deck.group] = 0;
         groupOrder.push(deck.group);
       }
-      groupMap[deck.group].push(deck);
+      groupCounts[deck.group]++;
     }
   });
 
-  groupOrder.forEach(name => {
-    const decksInGroup = groupMap[name];
+  if (groupOrder.length > 0) {
+    el.groupFilter.innerHTML = '<option value="">All</option>' +
+      groupOrder.map(g => `<option value="${g}">${g} (${groupCounts[g]})</option>`).join('');
+    el.groupFilter.value = '';
+    el.groupFilterWrap.classList.remove('hidden');
+  } else {
+    el.groupFilterWrap.classList.add('hidden');
+  }
 
-    if (decksInGroup.length === 1) {
-      const label = document.createElement('div');
-      label.className = 'deck-group-solo-label';
-      label.textContent = name;
-      el.deckList.appendChild(label);
-      el.deckList.appendChild(makeDeckButton(decksInGroup[0]));
-      return;
-    }
+  applyGroupFilter('');
+}
 
-    const wrap = document.createElement('div');
-    wrap.className = 'deck-group';
-
-    const header = document.createElement('button');
-    header.className = 'deck-group-header';
-    header.innerHTML = `<span>${name} <span class="deck-group-count">(${decksInGroup.length})</span></span><span class="deck-group-chevron">▸</span>`;
-
-    const items = document.createElement('div');
-    items.className = 'deck-group-items';
-    decksInGroup.forEach(deck => items.appendChild(makeDeckButton(deck)));
-
-    header.addEventListener('click', () => {
-      const open = wrap.classList.toggle('open');
-      header.querySelector('.deck-group-chevron').textContent = open ? '▾' : '▸';
-    });
-
-    wrap.appendChild(header);
-    wrap.appendChild(items);
-    el.deckList.appendChild(wrap);
-  });
-
-  ungrouped.forEach(deck => el.deckList.appendChild(makeDeckButton(deck)));
+function applyGroupFilter(group) {
+  el.deckList.innerHTML = '';
+  const decks = group
+    ? state.loadedDecks.filter(d => d.group === group)
+    : state.loadedDecks;
+  decks.forEach(deck => el.deckList.appendChild(makeDeckButton(deck)));
 }
 
 function handleSelectDeck(id, title, description) {
@@ -393,6 +375,7 @@ function showSummary() {
 }
 
 // ── Events ────────────────────────────────────────────────────────────────
+el.groupFilter.addEventListener('change', () => applyGroupFilter(el.groupFilter.value));
 el.btnLoad.addEventListener('click', handleLoadDecks);
 el.sheetUrl.addEventListener('keydown', e => { if (e.key === 'Enter') handleLoadDecks(); });
 
