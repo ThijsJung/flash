@@ -8,6 +8,7 @@ function track(event, props) {
 // ── State ────────────────────────────────────────────────────────────────
 const state = {
   sheetId: '',
+  loadedDecks: [],   // decks fetched from the index tab
   allCards: [],      // all cards fetched from the cards tab
   fullDeck: [],      // cards for the selected deck
   deck: [],          // the sliced/shuffled session deck
@@ -36,6 +37,8 @@ const el = {
   btnLoad:            document.getElementById('btn-load'),
   urlError:           document.getElementById('url-error'),
   btnBackUrl:         document.getElementById('btn-back-url'),
+  groupFilterWrap:    document.getElementById('group-filter-wrap'),
+  groupFilter:        document.getElementById('group-filter'),
   deckList:           document.getElementById('deck-list'),
   btnBackReady:       document.getElementById('btn-back-ready'),
   readyDeckName:      document.getElementById('ready-deck-name'),
@@ -126,6 +129,7 @@ async function fetchIndex(sheetId) {
   const idIdx    = headers.findIndex(h => h.toLowerCase() === 'id');
   const titleIdx = headers.findIndex(h => h.toLowerCase() === 'title');
   const descIdx  = headers.findIndex(h => h.toLowerCase() === 'description');
+  const groupIdx = headers.findIndex(h => h.toLowerCase() === 'group');
 
   if (idIdx === -1 || titleIdx === -1) throw new Error('First tab must have "id" and "title" columns.');
 
@@ -135,6 +139,7 @@ async function fetchIndex(sheetId) {
       id:          String(row.c[idIdx].v),
       title:       String(row.c[titleIdx]?.v ?? ''),
       description: descIdx >= 0 ? String(row.c[descIdx]?.v ?? '') : '',
+      group:       groupIdx >= 0 ? String(row.c[groupIdx]?.v ?? '') : '',
     }));
 }
 
@@ -196,15 +201,47 @@ async function handleLoadDecks() {
 }
 
 // ── Deck picker ───────────────────────────────────────────────────────────
+function makeDeckButton({ id, title, description }) {
+  const btn = document.createElement('button');
+  btn.className = 'deck-item';
+  btn.innerHTML = `<span class="deck-item-name">${title}</span>${description ? `<span class="deck-item-desc">${description}</span>` : ''}`;
+  btn.addEventListener('click', () => handleSelectDeck(id, title, description));
+  return btn;
+}
+
 function renderDeckList(decks) {
-  el.deckList.innerHTML = '';
-  decks.forEach(({ id, title, description }) => {
-    const btn = document.createElement('button');
-    btn.className = 'deck-item';
-    btn.innerHTML = `<span class="deck-item-name">${title}</span>${description ? `<span class="deck-item-desc">${description}</span>` : ''}`;
-    btn.addEventListener('click', () => handleSelectDeck(id, title, description));
-    el.deckList.appendChild(btn);
+  state.loadedDecks = decks;
+
+  const groupOrder = [];
+  const groupCounts = {};
+  decks.forEach(deck => {
+    if (deck.group) {
+      if (!groupCounts[deck.group]) {
+        groupCounts[deck.group] = 0;
+        groupOrder.push(deck.group);
+      }
+      groupCounts[deck.group]++;
+    }
   });
+
+  if (groupOrder.length > 0) {
+    el.groupFilter.innerHTML = '<option value="">All</option>' +
+      groupOrder.map(g => `<option value="${g}">${g} (${groupCounts[g]})</option>`).join('');
+    el.groupFilter.value = '';
+    el.groupFilterWrap.classList.remove('hidden');
+  } else {
+    el.groupFilterWrap.classList.add('hidden');
+  }
+
+  applyGroupFilter('');
+}
+
+function applyGroupFilter(group) {
+  el.deckList.innerHTML = '';
+  const decks = group
+    ? state.loadedDecks.filter(d => d.group === group)
+    : state.loadedDecks;
+  decks.forEach(deck => el.deckList.appendChild(makeDeckButton(deck)));
 }
 
 function handleSelectDeck(id, title, description) {
@@ -338,6 +375,7 @@ function showSummary() {
 }
 
 // ── Events ────────────────────────────────────────────────────────────────
+el.groupFilter.addEventListener('change', () => applyGroupFilter(el.groupFilter.value));
 el.btnLoad.addEventListener('click', handleLoadDecks);
 el.sheetUrl.addEventListener('keydown', e => { if (e.key === 'Enter') handleLoadDecks(); });
 
