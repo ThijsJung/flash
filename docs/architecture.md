@@ -57,7 +57,7 @@ flash/
 
 **Reasoning:** Zero infrastructure to manage, free for public repos, deploy in ~30 seconds. Fits a no-build-step static site perfectly.
 
-**Revisit when:** a backend is introduced — at that point CloudFront + S3 (AWS) or Vercel/Netlify become more natural fits.
+**Superseded by:** ADR-009 — migrating to Vercel for per-branch preview deployments and better Supabase integration ahead of the backend build.
 
 ---
 
@@ -109,6 +109,25 @@ This builds on the existing `?sheet=SHEET_ID` query param (added in MVP) which a
 - React Router / Vue Router — come with their framework
 
 **Revisit when:** the number of routes or param complexity grows to the point where manual matching becomes unwieldy.
+
+---
+
+## ADR-009: Hosting — Vercel
+
+**Decision:** Migrate frontend hosting from GitHub Pages to Vercel.
+
+**Reasoning:**
+- Per-branch preview deployments out of the box — every PR gets a unique URL with no extra config, which is the primary motivation
+- Better DX than GitHub Pages (instant deploys, deployment status on PRs, rollbacks)
+- First-class Supabase integration: env vars per deployment environment (production / preview), and optional Supabase database branching pairs naturally with Vercel preview branches
+- No lock-in — the app is static, migrating away is a `git push`
+
+**Ruled out:**
+- AWS Amplify — familiar from other projects but pulls toward the AWS ecosystem, which we want to avoid
+- Netlify — equally capable; Vercel chosen for slightly more polished DX and wider adoption for this type of project
+- Cloudflare Pages — best CDN performance and most generous free tier, but less refined UI/DX; worth revisiting if bandwidth becomes a cost concern
+
+**Revisit when:** Vercel changes its free tier in a meaningful way, or the backend workload makes a different deployment model (e.g. containers) more natural.
 
 ---
 
